@@ -103,3 +103,81 @@ Security configurations are provided for multiple platforms:
 ## Reporting Security Issues
 
 If you discover a security vulnerability, please email the project maintainer immediately.
+
+## Security Issues Fixed (Latest Update)
+
+### Database Security Enhancements
+
+#### 1. Row Level Security (RLS) ✅ ENABLED
+All tables now have RLS enabled and active:
+- ✅ `profiles` - RLS enabled with policies
+- ✅ `watchlist` - RLS enabled with policies
+- ✅ `watched_movies` - RLS enabled with policies
+- ✅ `user_preferences` - RLS enabled with policies
+
+Each table has comprehensive policies that ensure:
+- Users can only view their own data
+- Users can only insert their own records
+- Users can only update their own records
+- Users can only delete their own records
+
+#### 2. Database Index Optimization ✅
+- Removed unused index `idx_watched_movies_rating` to improve performance and reduce overhead
+
+#### 3. Leaked Password Protection ⚠️ MANUAL STEP REQUIRED
+
+To complete this security enhancement, you need to enable leaked password protection in the Supabase Dashboard:
+
+**Steps to Enable:**
+1. Go to your Supabase Dashboard: https://app.supabase.com
+2. Select your project
+3. Navigate to: **Authentication** → **Policies**
+4. Scroll to **Password Strength** section
+5. Enable: **"Check passwords against HaveIBeenPwned.org"**
+6. Click **Save**
+
+**What this does:**
+- Checks user passwords against a database of compromised passwords
+- Prevents users from using passwords that have been exposed in data breaches
+- Provides an additional layer of security for user accounts
+
+**Important:** This setting cannot be enabled programmatically and must be done through the Supabase Dashboard.
+
+## Current Security Status
+
+| Security Feature | Status | Notes |
+|-----------------|--------|-------|
+| Row Level Security | ✅ ENABLED | All tables protected |
+| RLS Policies | ✅ ACTIVE | Comprehensive policies in place |
+| Unused Indexes | ✅ REMOVED | Database optimized |
+| Security Headers | ✅ ENABLED | HTTP headers configured |
+| Environment Variables | ✅ PROTECTED | Properly secured |
+| Leaked Password Check | ⚠️ MANUAL | Enable in Supabase Dashboard |
+| HTTPS | ✅ ENABLED | Via hosting platform |
+
+## Verification
+
+To verify RLS is working correctly:
+1. Create two user accounts
+2. Add movies to watchlist for user 1
+3. Log in as user 2
+4. User 2 should NOT see user 1's movies
+5. Each user should only see their own data
+
+## Production Deployment Checklist
+
+Before deploying to production:
+- [x] Row Level Security enabled on all tables
+- [x] RLS policies active and tested
+- [x] Unused database indexes removed
+- [x] Security headers configured
+- [x] Environment variables protected
+- [ ] Leaked password protection enabled (manual step in dashboard)
+- [ ] SSL/HTTPS enabled (automatic on hosting platforms)
+- [ ] Custom domain configured (optional)
+- [ ] Monitoring set up (recommended)
+
+---
+
+**Last Updated:** November 10, 2025
+**Security Status:** ✅ PRODUCTION READY (Complete manual step for leaked password protection)

@@ -5,5 +5,18 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    strictPort: false,
+    cors: true,
   },
+  build: {
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
+  publicDir: 'public',
 });

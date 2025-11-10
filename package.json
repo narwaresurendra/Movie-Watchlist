@@ -22,5 +22,8 @@
     "react-router-dom": "^7.9.5",
     "tailwindcss": "^4.1.17",
     "vite": "^7.2.2"
+  },
+  "devDependencies": {
+    "terser": "^5.44.1"
   }
 }

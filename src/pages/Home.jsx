@@ -1,70 +1,98 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MovieCard } from '../components/MovieCard';
-
-const DUMMY_TRENDING_MOVIES = [
-  {
-    id: 1,
-    title: 'Inception',
-    poster_path: '/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-    release_date: '2010-07-16',
-    overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.',
-  },
-  {
-    id: 2,
-    title: 'The Dark Knight',
-    poster_path: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-    release_date: '2008-07-18',
-    overview: 'Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.',
-  },
-  {
-    id: 3,
-    title: 'Interstellar',
-    poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    release_date: '2014-11-07',
-    overview: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.',
-  },
-  {
-    id: 4,
-    title: 'The Matrix',
-    poster_path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
-    release_date: '1999-03-31',
-    overview: 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.',
-  },
-  {
-    id: 5,
-    title: 'Pulp Fiction',
-    poster_path: '/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg',
-    release_date: '1994-10-14',
-    overview: 'The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.',
-  },
-  {
-    id: 6,
-    title: 'Forrest Gump',
-    poster_path: '/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg',
-    release_date: '1994-07-06',
-    overview: 'The presidencies of Kennedy and Johnson, the Vietnam War, and other historical events unfold from the perspective of an Alabama man.',
-  },
-  {
-    id: 7,
-    title: 'The Shawshank Redemption',
-    poster_path: '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg',
-    release_date: '1994-09-23',
-    overview: 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
-  },
-  {
-    id: 8,
-    title: 'Fight Club',
-    poster_path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
-    release_date: '1999-10-15',
-    overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.',
-  },
-];
+import { SearchResults } from '../components/SearchResults';
+import { Recommendations } from '../components/Recommendations';
+import { searchMovies, getTrendingMovies, formatMovieData } from '../services/tmdb';
+import { useDebounce } from '../hooks/useDebounce';
+import { supabase } from '../services/supabase';
+import { useAuth } from '../context/AuthContext';
 
 export const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [message, setMessage] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchTrendingMovies();
+  }, []);
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      performSearch(debouncedSearch);
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedSearch]);
+
+  const fetchTrendingMovies = async () => {
+    const movies = await getTrendingMovies();
+    setTrendingMovies(movies);
+  };
+
+  const performSearch = async (query) => {
+    setSearchLoading(true);
+    try {
+      const results = await searchMovies(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const addToWatchlist = async (movie) => {
+    try {
+      const { data: existing } = await supabase
+        .from('watchlist')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('movie_id', movie.id)
+        .maybeSingle();
+
+      if (existing) {
+        showMessage('Movie already in watchlist', 'info');
+        return;
+      }
+
+      const movieData = formatMovieData(movie);
+      const { error } = await supabase
+        .from('watchlist')
+        .insert([{ ...movieData, user_id: user.id }]);
+
+      if (error) throw error;
+      showMessage('Added to watchlist!', 'success');
+    } catch (error) {
+      console.error('Error adding to watchlist:', error);
+      showMessage('Error adding to watchlist', 'error');
+    }
+  };
+
+  const showMessage = (text, type) => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage(''), 3000);
+  };
 
   return (
     <div className="min-h-screen">
+      {message && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg animate-fade-in-up ${
+            message.type === 'success'
+              ? 'bg-green-500 text-white'
+              : message.type === 'error'
+              ? 'bg-red-500 text-white'
+              : 'bg-blue-500 text-white'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+
       <section className="hero-gradient pt-16 pb-24">
         <div className="section-container">
           <div className="text-center max-w-4xl mx-auto">
@@ -78,7 +106,7 @@ export const Home = () => {
               Your personal cinema companion.
             </p>
 
-            <div className="max-w-2xl mx-auto animate-fade-in-up stagger-2">
+            <div className="max-w-2xl mx-auto animate-fade-in-up stagger-2 relative">
               <div className="relative">
                 <input
                   type="text"
@@ -102,6 +130,13 @@ export const Home = () => {
                 </svg>
               </div>
 
+              <SearchResults
+                movies={searchResults}
+                onAddToWatchlist={addToWatchlist}
+                loading={searchLoading}
+                onClose={() => setSearchQuery('')}
+              />
+
               <div className="mt-6 flex items-center justify-center space-x-4 text-sm text-gray-500">
                 <span className="flex items-center space-x-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -117,6 +152,12 @@ export const Home = () => {
 
       <section className="py-20 bg-white">
         <div className="section-container">
+          <Recommendations />
+        </div>
+      </section>
+
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="section-container">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
@@ -126,28 +167,25 @@ export const Home = () => {
                 The most popular movies everyone is talking about
               </p>
             </div>
-            <button className="hidden md:block btn-secondary px-6 py-3">
-              View All
-            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {DUMMY_TRENDING_MOVIES.map((movie, index) => (
-              <div key={movie.id} className={`animate-fade-in-up stagger-${Math.min(index + 1, 6)}`}>
-                <MovieCard
-                  movie={movie}
-                  onAddToWatchlist={() => console.log('Add to watchlist:', movie.title)}
-                  showActions={true}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <button className="md:hidden btn-secondary px-8 py-3">
-              View All Movies
-            </button>
-          </div>
+          {trendingMovies.length === 0 ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {trendingMovies.map((movie, index) => (
+                <div key={movie.id} className={`animate-fade-in-up stagger-${Math.min(index + 1, 6)}`}>
+                  <MovieCard
+                    movie={movie}
+                    onAddToWatchlist={() => addToWatchlist(movie)}
+                    showActions={true}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

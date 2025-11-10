@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../services/tmdb';
+import { useNavigate } from 'react-router-dom';
 
 export const Profile = () => {
-  const { profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     watchlistCount: 0,
     watchedCount: 0,
     averageRating: 0,
   });
+  const [recentMovies, setRecentMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchRecentMovies();
   }, []);
 
   const fetchStats = async () => {
@@ -20,12 +25,12 @@ export const Profile = () => {
       const { data: watchlistData } = await supabase
         .from('watchlist')
         .select('id', { count: 'exact' })
-        .eq('user_id', profile.id);
+        .eq('user_id', user.id);
 
       const { data: watchedData } = await supabase
         .from('watched_movies')
         .select('rating')
-        .eq('user_id', profile.id);
+        .eq('user_id', user.id);
 
       const watchedCount = watchedData?.length || 0;
       const averageRating =
@@ -42,6 +47,28 @@ export const Profile = () => {
       console.error('Error fetching stats:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecentMovies = async () => {
+    try {
+      const { data } = await supabase
+        .from('watched_movies')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('watched_date', { ascending: false })
+        .limit(5);
+
+      setRecentMovies(data || []);
+    } catch (error) {
+      console.error('Error fetching recent movies:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (confirm('Are you sure you want to log out?')) {
+      await signOut();
+      navigate('/login');
     }
   };
 
@@ -119,6 +146,49 @@ export const Profile = () => {
                 </div>
               </div>
             )}
+
+            {recentMovies.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-white mb-3">Recently Watched</h3>
+                <div className="space-y-3">
+                  {recentMovies.map((movie) => (
+                    <div
+                      key={movie.id}
+                      className="bg-slate-700 rounded-lg p-4 flex items-center space-x-4 hover:bg-slate-600 transition"
+                    >
+                      <img
+                        src={getImageUrl(movie.poster_path)}
+                        alt={movie.title}
+                        className="w-16 h-24 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <h4 className="text-white font-semibold">{movie.title}</h4>
+                        <p className="text-slate-400 text-sm">{movie.release_year}</p>
+                      </div>
+                      <div className="text-yellow-400 font-bold text-lg">
+                        {movie.rating.toFixed(1)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-slate-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Account</h3>
+              <div className="space-y-3">
+                <div className="bg-slate-700 rounded-lg p-4">
+                  <p className="text-slate-400 text-sm">Email</p>
+                  <p className="text-white">{user?.email}</p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium transition"
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

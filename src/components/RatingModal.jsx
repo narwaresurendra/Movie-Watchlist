@@ -22,29 +22,54 @@ export const RatingModal = ({ movie, onSubmit, onClose }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-white mb-4">Rate this movie</h2>
-        <p className="text-slate-300 mb-6">{movie.title}</p>
+  const handleSkip = async () => {
+    setLoading(true);
+    try {
+      await onSubmit(3.0);
+      onClose();
+    } catch (error) {
+      console.error('Error skipping rating:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        <div className="flex justify-center mb-6">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="glass-effect rounded-3xl p-8 max-w-md w-full animate-fade-in-up shadow-2xl">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Rate this movie</h2>
+        <p className="text-gray-600 mb-8 text-lg">{movie.title}</p>
+
+        <div className="flex flex-col items-center mb-8">
           <StarRating rating={rating} onRatingChange={setRating} />
+          {rating > 0 && (
+            <p className="mt-4 text-sm text-gray-600">
+              {rating >= 4.5 ? 'Amazing!' : rating >= 4.0 ? 'Great!' : rating >= 3.0 ? 'Good!' : rating >= 2.0 ? 'Okay' : 'Not great'}
+            </p>
+          )}
         </div>
 
-        <div className="flex space-x-3">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg font-medium transition"
-          >
-            Cancel
-          </button>
+        <div className="flex flex-col space-y-3">
           <button
             onClick={handleSubmit}
             disabled={loading || rating < 0.5}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading ? 'Submitting...' : 'Submit Rating'}
+          </button>
+          <button
+            onClick={handleSkip}
+            disabled={loading}
+            className="btn-secondary py-3 disabled:opacity-50"
+          >
+            Skip for now
+          </button>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="text-gray-600 hover:text-gray-900 py-2 font-medium transition"
+          >
+            Cancel
           </button>
         </div>
       </div>

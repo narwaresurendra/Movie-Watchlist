@@ -17,6 +17,19 @@ export const searchMovies = async (query) => {
   }
 };
 
+export const getTrendingMovies = async () => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/trending/movie/week?api_key=${TMDB_API_KEY}`
+    );
+    const data = await response.json();
+    return data.results?.slice(0, 8) || [];
+  } catch (error) {
+    console.error('Error fetching trending movies:', error);
+    return [];
+  }
+};
+
 export const getMovieDetails = async (movieId) => {
   try {
     const response = await fetch(

@@ -10,11 +10,32 @@ export const WatchedMovies = () => {
   const [loading, setLoading] = useState(true);
   const [editingMovie, setEditingMovie] = useState(null);
   const [message, setMessage] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [filterRating, setFilterRating] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
     fetchWatchedMovies();
   }, [user]);
+
+  const filteredAndSortedMovies = () => {
+    let filtered = movies.filter(m => m.rating >= filterRating);
+
+    return filtered.sort((a, b) => {
+      if (sortBy === 'date') {
+        return new Date(b.watched_date) - new Date(a.watched_date);
+      } else if (sortBy === 'rating') {
+        return b.rating - a.rating;
+      } else if (sortBy === 'title') {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+  };
+
+  const averageRating = movies.length > 0
+    ? (movies.reduce((sum, m) => sum + parseFloat(m.rating), 0) / movies.length).toFixed(1)
+    : 0;
 
   const fetchWatchedMovies = async () => {
     try {
@@ -91,10 +112,21 @@ export const WatchedMovies = () => {
     );
   }
 
+  const displayedMovies = filteredAndSortedMovies();
+
   return (
     <div className="min-h-screen bg-slate-900 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-8">Watched Movies</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-white">Watched Movies</h1>
+          {movies.length > 0 && (
+            <div className="text-right">
+              <p className="text-slate-400 text-sm">Total watched</p>
+              <p className="text-white text-2xl font-bold">{movies.length}</p>
+              <p className="text-slate-400 text-sm">Average rating: {averageRating}</p>
+            </div>
+          )}
+        </div>
 
         {message && (
           <div
@@ -115,8 +147,37 @@ export const WatchedMovies = () => {
             <p className="text-slate-500">Mark movies as watched to see them here</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {movies.map((movie) => (
+          <>
+            <div className="mb-6 flex flex-wrap gap-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-slate-400 text-sm">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-slate-800 text-white border border-slate-700 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="date">Date Watched</option>
+                  <option value="rating">Rating</option>
+                  <option value="title">Title</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <label className="text-slate-400 text-sm">Filter:</label>
+                <select
+                  value={filterRating}
+                  onChange={(e) => setFilterRating(parseFloat(e.target.value))}
+                  className="bg-slate-800 text-white border border-slate-700 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="0">All Ratings</option>
+                  <option value="4">4+ Stars</option>
+                  <option value="3">3+ Stars</option>
+                  <option value="2">2+ Stars</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {displayedMovies.map((movie) => (
               <div
                 key={movie.id}
                 className="bg-slate-800 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
@@ -160,6 +221,7 @@ export const WatchedMovies = () => {
               </div>
             ))}
           </div>
+          </>
         )}
       </div>
 

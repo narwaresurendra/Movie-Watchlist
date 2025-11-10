@@ -1,0 +1,39 @@
+================================================================================
+                    ⚠️  MANUAL SECURITY STEP REQUIRED  ⚠️
+================================================================================
+
+WHAT: Enable Leaked Password Protection in Supabase
+WHY:  Prevents users from using compromised passwords
+WHERE: Supabase Dashboard (cannot be automated)
+TIME: 3 minutes
+
+================================================================================
+                            QUICK INSTRUCTIONS
+================================================================================
+
+1. Go to: https://app.supabase.com/project/zoudlrmyhuydgifzelgk
+
+2. Click: Authentication → Policies
+
+3. Find: "Password Strength" section
+
+4. Enable: "Check passwords against HaveIBeenPwned.org"
+
+5. Click: Save
+
+================================================================================
+                              VERIFICATION
+================================================================================
+
+Test with password "password123" → Should FAIL (it's compromised)
+Test with unique password → Should WORK
+
+================================================================================
+
+📖 FULL GUIDE: See ENABLE_LEAKED_PASSWORD_PROTECTION_NOW.md
+
+⚠️  This is your ONLY remaining security issue!
+⚠️  Everything else is already fixed and deployed!
+⚠️  Do this now - takes 3 minutes!
+
+================================================================================

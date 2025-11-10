@@ -17,27 +17,20 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    const dummyUser = {
+      id: 'dummy-user-123',
+      email: 'demo@cinelist.com',
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      (async () => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-      })();
-    });
+    const dummyProfile = {
+      id: 'dummy-user-123',
+      username: 'DemoUser',
+      created_at: new Date().toISOString(),
+    };
 
-    return () => subscription.unsubscribe();
+    setUser(dummyUser);
+    setProfile(dummyProfile);
+    setLoading(false);
   }, []);
 
   const fetchProfile = async (userId) => {

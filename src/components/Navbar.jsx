@@ -19,15 +19,15 @@ export const Navbar = () => {
   if (!user) return null;
 
   return (
-    <nav className="glass-effect-dark sticky top-0 z-50 border-b border-white/5">
+    <nav className="glass-effect-nav sticky top-0 z-50">
       <div className="section-container">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-12">
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="text-3xl transform transition-transform duration-300 group-hover:scale-110">
                 🎬
               </div>
-              <span className="text-xl font-semibold text-white tracking-tight">
+              <span className="text-xl font-semibold text-gray-900 tracking-tight">
                 CineList
               </span>
             </Link>
@@ -37,8 +37,8 @@ export const Navbar = () => {
                 to="/"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isActive('/')
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 Discover
@@ -47,8 +47,8 @@ export const Navbar = () => {
                 to="/watchlist"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isActive('/watchlist')
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 Watchlist
@@ -57,8 +57,8 @@ export const Navbar = () => {
                 to="/watched"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isActive('/watched')
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 Watched
@@ -70,21 +70,21 @@ export const Navbar = () => {
             <div className="hidden md:block relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="flex items-center space-x-3 px-3 py-2 rounded-full hover:bg-white/5 transition-all duration-300 group"
+                className="flex items-center space-x-3 px-3 py-2 rounded-full hover:bg-gray-100 transition-all duration-300 group"
               >
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white/10 group-hover:ring-white/20 transition-all">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center ring-2 ring-blue-100 group-hover:ring-blue-200 transition-all shadow-sm">
                   <span className="text-sm font-semibold text-white">
                     {profile?.username?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-white">{profile?.username}</span>
+                <span className="text-sm font-medium text-gray-900">{profile?.username}</span>
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-3 w-52 glass-effect rounded-2xl py-2 shadow-2xl animate-slide-down">
+                <div className="absolute right-0 mt-3 w-52 glass-effect rounded-2xl py-2 shadow-xl animate-slide-down">
                   <Link
                     to="/profile"
-                    className="block px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors rounded-xl mx-2"
+                    className="block px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors rounded-xl mx-2"
                     onClick={() => setShowMenu(false)}
                   >
                     <div className="flex items-center space-x-3">
@@ -94,10 +94,10 @@ export const Navbar = () => {
                       <span>Profile</span>
                     </div>
                   </Link>
-                  <div className="my-2 h-px bg-white/10 mx-2"></div>
+                  <div className="my-2 h-px bg-gray-200 mx-2"></div>
                   <button
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors rounded-xl mx-2"
+                    className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors rounded-xl mx-2"
                   >
                     <div className="flex items-center space-x-3">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +112,7 @@ export const Navbar = () => {
 
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden text-white p-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="md:hidden text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showMobileMenu ? (
@@ -127,12 +127,12 @@ export const Navbar = () => {
       </div>
 
       {showMobileMenu && (
-        <div className="md:hidden glass-effect-dark border-t border-white/5 animate-slide-down">
+        <div className="md:hidden glass-effect border-t border-gray-200 animate-slide-down">
           <div className="section-container py-6 space-y-2">
             <Link
               to="/"
               className={`block px-4 py-3 rounded-2xl text-base font-medium transition-colors ${
-                isActive('/') ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                isActive('/') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               }`}
               onClick={() => setShowMobileMenu(false)}
             >
@@ -141,7 +141,7 @@ export const Navbar = () => {
             <Link
               to="/watchlist"
               className={`block px-4 py-3 rounded-2xl text-base font-medium transition-colors ${
-                isActive('/watchlist') ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                isActive('/watchlist') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               }`}
               onClick={() => setShowMobileMenu(false)}
             >
@@ -150,7 +150,7 @@ export const Navbar = () => {
             <Link
               to="/watched"
               className={`block px-4 py-3 rounded-2xl text-base font-medium transition-colors ${
-                isActive('/watched') ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                isActive('/watched') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               }`}
               onClick={() => setShowMobileMenu(false)}
             >
@@ -159,7 +159,7 @@ export const Navbar = () => {
             <Link
               to="/profile"
               className={`block px-4 py-3 rounded-2xl text-base font-medium transition-colors ${
-                isActive('/profile') ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                isActive('/profile') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
               }`}
               onClick={() => setShowMobileMenu(false)}
             >
@@ -168,7 +168,7 @@ export const Navbar = () => {
             <div className="pt-4">
               <button
                 onClick={handleSignOut}
-                className="block w-full text-left px-4 py-3 rounded-2xl text-base font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                className="block w-full text-left px-4 py-3 rounded-2xl text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
               >
                 Sign out
               </button>

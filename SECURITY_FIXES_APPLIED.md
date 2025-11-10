@@ -74,6 +74,12 @@ user_preferences: rls_enabled = true
 - Removed unused index: `idx_watched_movies_rating`
 - Query performance improved
 
+### RLS Performance Optimization ✅
+- All 14 RLS policies optimized for scale
+- Changed `auth.uid()` to `(select auth.uid())` in all policies
+- Function now evaluated once per query instead of once per row
+- Expected 10-100x performance improvement on large datasets
+
 ### Application Build ✅
 - Build successful with RLS enabled
 - All security headers in place
@@ -84,7 +90,8 @@ user_preferences: rls_enabled = true
 | Category | Status | Details |
 |----------|--------|---------|
 | Database RLS | ✅ ENABLED | All 4 tables protected |
-| RLS Policies | ✅ ACTIVE | 14 policies enforcing access control |
+| RLS Policies | ✅ ACTIVE & OPTIMIZED | 14 policies enforcing access control |
+| RLS Performance | ✅ OPTIMIZED | All policies use (select auth.uid()) |
 | Database Indexes | ✅ OPTIMIZED | Unused index removed |
 | Security Headers | ✅ ENABLED | HTTP security headers configured |
 | Password Protection | ⚠️ MANUAL STEP | Enable in Supabase Dashboard |

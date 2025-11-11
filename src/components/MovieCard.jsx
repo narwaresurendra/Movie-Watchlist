@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getImageUrl } from '../services/tmdb';
 
-export const MovieCard = ({ movie, onAddToWatchlist, onRemove, onMarkWatched, showActions = true }) => {
+export const MovieCard = ({ movie, onAddToWatchlist, onRemove, onMarkWatched, onWriteReview, showActions = true }) => {
   const [loading, setLoading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -72,6 +72,16 @@ export const MovieCard = ({ movie, onAddToWatchlist, onRemove, onMarkWatched, sh
                   className="w-full btn-secondary py-2.5 text-sm border-2 border-green-500 text-green-600 hover:bg-green-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Mark as Watched
+                </button>
+              )}
+
+              {onWriteReview && (
+                <button
+                  onClick={() => handleAction(onWriteReview)}
+                  disabled={loading}
+                  className="w-full btn-secondary py-2.5 text-sm border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Write Review
                 </button>
               )}
 

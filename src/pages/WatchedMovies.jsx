@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { getImageUrl } from '../services/tmdb';
 import { StarRating } from '../components/StarRating';
 import { RatingModal } from '../components/RatingModal';
+import { ReviewModal } from '../components/ReviewModal';
 
 export const WatchedMovies = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingMovie, setEditingMovie] = useState(null);
+  const [reviewMovie, setReviewMovie] = useState(null);
   const [message, setMessage] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [filterRating, setFilterRating] = useState(0);
@@ -205,6 +207,12 @@ export const WatchedMovies = () => {
 
                   <div className="space-y-2">
                     <button
+                      onClick={() => setReviewMovie(movie)}
+                      className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition"
+                    >
+                      Write Review
+                    </button>
+                    <button
                       onClick={() => setEditingMovie(movie)}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition"
                     >
@@ -230,6 +238,17 @@ export const WatchedMovies = () => {
           movie={editingMovie}
           onSubmit={updateRating}
           onClose={() => setEditingMovie(null)}
+        />
+      )}
+
+      {reviewMovie && (
+        <ReviewModal
+          movie={reviewMovie}
+          onClose={() => setReviewMovie(null)}
+          onSubmit={() => {
+            showMessage('Review submitted successfully!', 'success');
+            setReviewMovie(null);
+          }}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { Watchlist } from './pages/Watchlist';
 import { WatchedMovies } from './pages/WatchedMovies';
+import { MyReviews } from './pages/MyReviews';
 import { Profile } from './pages/Profile';
 
 const RedirectIfAuthenticated = ({ children }) => {
@@ -74,6 +75,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <WatchedMovies />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MyReviews />
                 </Layout>
               </ProtectedRoute>
             }

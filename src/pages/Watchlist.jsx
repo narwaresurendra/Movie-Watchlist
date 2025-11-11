@@ -3,11 +3,13 @@ import { supabase } from '../services/supabase';
 import { useAuth } from '../context/AuthContext';
 import { MovieCard } from '../components/MovieCard';
 import { RatingModal } from '../components/RatingModal';
+import { ReviewModal } from '../components/ReviewModal';
 
 export const Watchlist = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [reviewMovie, setReviewMovie] = useState(null);
   const [message, setMessage] = useState('');
   const { user } = useAuth();
 
@@ -128,6 +130,7 @@ export const Watchlist = () => {
                 movie={movie}
                 onRemove={() => removeFromWatchlist(movie.id)}
                 onMarkWatched={() => markAsWatched(movie)}
+                onWriteReview={() => setReviewMovie(movie)}
               />
             ))}
           </div>
@@ -139,6 +142,17 @@ export const Watchlist = () => {
           movie={selectedMovie}
           onSubmit={submitRating}
           onClose={() => setSelectedMovie(null)}
+        />
+      )}
+
+      {reviewMovie && (
+        <ReviewModal
+          movie={reviewMovie}
+          onClose={() => setReviewMovie(null)}
+          onSubmit={() => {
+            showMessage('Review submitted successfully!', 'success');
+            setReviewMovie(null);
+          }}
         />
       )}
     </div>

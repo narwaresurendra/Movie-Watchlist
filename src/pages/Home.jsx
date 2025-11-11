@@ -13,6 +13,7 @@ export const Home = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [message, setMessage] = useState('');
+  const [lastAddedMovie, setLastAddedMovie] = useState(null);
   const debouncedSearch = useDebounce(searchQuery, 500);
   const { user } = useAuth();
 
@@ -60,15 +61,39 @@ export const Home = () => {
       }
 
       const movieData = formatMovieData(movie);
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('watchlist')
-        .insert([{ ...movieData, user_id: user.id }]);
+        .insert([{ ...movieData, user_id: user.id }])
+        .select()
+        .single();
 
       if (error) throw error;
-      showMessage('Added to watchlist!', 'success');
+
+      setLastAddedMovie({ ...inserted, title: movie.title });
+      showMessage('Added to watchlist!', 'success-undo');
     } catch (error) {
       console.error('Error adding to watchlist:', error);
       showMessage('Error adding to watchlist', 'error');
+    }
+  };
+
+  const removeLastAdded = async () => {
+    if (!lastAddedMovie) return;
+
+    try {
+      const { error } = await supabase
+        .from('watchlist')
+        .delete()
+        .eq('id', lastAddedMovie.id);
+
+      if (error) throw error;
+
+      setLastAddedMovie(null);
+      setMessage('');
+      showMessage('Removed from watchlist', 'success');
+    } catch (error) {
+      console.error('Error removing from watchlist:', error);
+      showMessage('Error removing from watchlist', 'error');
     }
   };
 
@@ -81,15 +106,32 @@ export const Home = () => {
     <div className="min-h-screen">
       {message && (
         <div
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg animate-fade-in-up ${
-            message.type === 'success'
+          className={`fixed top-4 right-4 z-50 rounded-2xl shadow-xl animate-fade-in-up ${
+            message.type === 'success-undo'
+              ? 'bg-green-500 text-white'
+              : message.type === 'success'
               ? 'bg-green-500 text-white'
               : message.type === 'error'
               ? 'bg-red-500 text-white'
               : 'bg-blue-500 text-white'
           }`}
         >
-          {message.text}
+          <div className={`${message.type === 'success-undo' ? 'flex items-center space-x-3 p-4' : 'p-4'}`}>
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="font-medium">{message.text}</span>
+            </div>
+            {message.type === 'success-undo' && lastAddedMovie && (
+              <button
+                onClick={removeLastAdded}
+                className="px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+              >
+                Undo
+              </button>
+            )}
+          </div>
         </div>
       )}
 

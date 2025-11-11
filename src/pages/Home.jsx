@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MovieCard } from '../components/MovieCard';
 import { SearchResults } from '../components/SearchResults';
 import { Recommendations } from '../components/Recommendations';
@@ -14,8 +15,9 @@ export const Home = () => {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [message, setMessage] = useState('');
   const [lastAddedMovie, setLastAddedMovie] = useState(null);
-  const debouncedSearch = useDebounce(searchQuery, 500);
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTrendingMovies();
@@ -99,7 +101,10 @@ export const Home = () => {
 
   const showMessage = (text, type) => {
     setMessage({ text, type });
-    setTimeout(() => setMessage(''), 3000);
+    setTimeout(() => {
+      setMessage('');
+      setLastAddedMovie(null);
+    }, 5000);
   };
 
   return (
@@ -116,19 +121,32 @@ export const Home = () => {
               : 'bg-blue-500 text-white'
           }`}
         >
-          <div className={`${message.type === 'success-undo' ? 'flex items-center space-x-3 p-4' : 'p-4'}`}>
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="font-medium">{message.text}</span>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="font-medium">{message.text}</span>
+              </div>
+              {message.type === 'success-undo' && lastAddedMovie && (
+                <button
+                  onClick={removeLastAdded}
+                  className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-medium transition-colors"
+                >
+                  Undo
+                </button>
+              )}
             </div>
-            {message.type === 'success-undo' && lastAddedMovie && (
+            {message.type === 'success-undo' && (
               <button
-                onClick={removeLastAdded}
-                className="px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+                onClick={() => navigate('/watchlist')}
+                className="w-full px-4 py-2 bg-white text-green-600 hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
               >
-                Undo
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                <span>View Watchlist</span>
               </button>
             )}
           </div>

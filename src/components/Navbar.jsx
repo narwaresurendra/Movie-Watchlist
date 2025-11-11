@@ -1,13 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../services/supabase';
 
 export const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [watchlistCount, setWatchlistCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (user) {
+      fetchWatchlistCount();
+      const channel = supabase
+        .channel('watchlist-changes')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'watchlist',
+          filter: `user_id=eq.${user.id}`
+        }, () => {
+          fetchWatchlistCount();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const fetchWatchlistCount = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('watchlist')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    setWatchlistCount(count || 0);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,13 +77,23 @@ export const Navbar = () => {
               </Link>
               <Link
                 to="/watchlist"
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative ${
                   isActive('/watchlist')
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                Watchlist
+                <span className="flex items-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <span>Watchlist</span>
+                  {watchlistCount > 0 && (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                      {watchlistCount}
+                    </span>
+                  )}
+                </span>
               </Link>
               <Link
                 to="/watched"
@@ -145,7 +187,19 @@ export const Navbar = () => {
               }`}
               onClick={() => setShowMobileMenu(false)}
             >
-              My Watchlist
+              <span className="flex items-center justify-between">
+                <span className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <span>My Watchlist</span>
+                </span>
+                {watchlistCount > 0 && (
+                  <span className="inline-flex items-center justify-center px-2.5 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                    {watchlistCount}
+                  </span>
+                )}
+              </span>
             </Link>
             <Link
               to="/watched"
